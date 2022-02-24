@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Controlador</title>
+    <style>
+        body {
+            background-color: #1c1c2e;
+            color: #fcecda;
+        }
+        .parameterAreaWrapper {
+            display: flex;
+            width: 100%;
+            height: 90vh;
+        }
+        .parameterArea {
+            display: flex;
+            flex-direction: column;
+            width: 20%;
+            background-color: #2b2b4b;
+            border-radius: 1em;
+            padding: 2em;
+            margin-right: 1em;
+        }
+        .sendButton {
+            height: 3em;
+            background-color: #252563;
+            font-size: 3em;
+            font-weight: bolder;
+            color: #eee5da;
+            border-radius: 1em;
+            border-style: solid;
+        }
+    </style>
+</head>
+
+<body>
+    <div class='parameterAreaWrapper'>
+        <div class="parameterArea">
+            <span>Strong Magnitude</span>
+            <input type="range" min="1" max="100" value="50" class="strongMagnitude" />
+            <span class='strongMagnitudeDisplay'>50%</span>
+            <br /><br /><br />
+
+            <span>Weak Magnitude</span>
+            <input type="range" min="1" max="100" value="50" class="weakMagnitude" />
+            <span class='weakMagnitudeDisplay'>50%</span>
+            <br /><br /><br />
+
+            <span>Duration</span>
+            <input type="range" min="0.5" max="5" step="0.1" value="1" class="duration" />
+            <span class='durationDisplay'>1 seconds</span>
+            <br /><br /><br />
+
+            <button class="sendButton">Send</button>
+        </div>
+        <div class="parameterArea">
+            <span>Strong Magnitude</span>
+            <input type="range" min="1" max="100" value="50" class="strongMagnitude" />
+            <span class='strongMagnitudeDisplay'>50%</span>
+            <br /><br /><br />
+
+            <span>Weak Magnitude</span>
+            <input type="range" min="1" max="100" value="50" class="weakMagnitude" />
+            <span class='weakMagnitudeDisplay'>50%</span>
+            <br /><br /><br />
+
+            <span>Duration</span>
+            <input type="range" min="0.5" max="5" step="0.1" value="1" class="duration" />
+            <span class='durationDisplay'>1 seconds</span>
+            <br /><br /><br />
+
+            <button class="sendButton">Send</button>
+        </div>
+        <div class="parameterArea">
+            <span>Strong Magnitude</span>
+            <input type="range" min="1" max="100" value="50" class="strongMagnitude" />
+            <span class='strongMagnitudeDisplay'>50%</span>
+            <br /><br /><br />
+
+            <span>Weak Magnitude</span>
+            <input type="range" min="1" max="100" value="50" class="weakMagnitude" />
+            <span class='weakMagnitudeDisplay'>50%</span>
+            <br /><br /><br />
+
+            <span>Duration</span>
+            <input type="range" min="0.5" max="5" step="0.1" value="1" class="duration" />
+            <span class='durationDisplay'>1 seconds</span>
+            <br /><br /><br />
+
+            <button class="sendButton">Send</button>
+        </div>
+        <div class="parameterArea">
+            <span>Strong Magnitude</span>
+            <input type="range" min="1" max="100" value="50" class="strongMagnitude" />
+            <span class='strongMagnitudeDisplay'>50%</span>
+            <br /><br /><br />
+
+            <span>Weak Magnitude</span>
+            <input type="range" min="1" max="100" value="50" class="weakMagnitude" />
+            <span class='weakMagnitudeDisplay'>50%</span>
+            <br /><br /><br />
+
+            <span>Duration</span>
+            <input type="range" min="0.5" max="5" step="0.1" value="1" class="duration" />
+            <span class='durationDisplay'>1 seconds</span>
+            <br /><br /><br />
+
+            <button class="sendButton">Send</button>
+        </div>
+    </div>
+    <div>
+        <span id="gamepadConnectionStatus">Gamepad is <b>not</b> connected</span>
+        <span>There are currently <b id='currentUserCount'>0</b> users online, of which <b id='currentVibratingUsers'>0</b> are receiving vibrations.</span>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const gamepadConnectionStatus = document.getElementById('gamepadConnectionStatus');
+        const currentUserCount = document.getElementById('currentUserCount');
+        const currentVibratingUsers = document.getElementById('currentVibratingUsers');
+        let gamepad = null;
+        const areas = [];
+
+        for (i of document.getElementsByClassName('parameterArea')) {
+            let strongMagnitude, weakMagnitude, strongMagnitudeDisplay, weakMagnitudeDisplay, duration, durationDisplay, button;
+            for (j of i.children) {
+                switch (j.className) {
+                    case 'strongMagnitude':
+                        strongMagnitude = j;
+                        break;
+                    case 'weakMagnitude':
+                        weakMagnitude = j;
+                        break;
+                    case 'strongMagnitudeDisplay':
+                        strongMagnitudeDisplay = j;
+                        break;
+                    case 'weakMagnitudeDisplay':
+                        weakMagnitudeDisplay = j;
+                        break;
+                    case 'duration':
+                        duration = j;
+                        break;
+                    case 'durationDisplay':
+                        durationDisplay = j;
+                        break;
+                    case 'sendButton':
+                        button = j;
+                        break;
+                    default:
+                        break;
+                }
+                if (j.className == 'strongMagnitude') {
+                    strongMagnitude = j;
+                }
+            }
+            areas.push({strongMagnitude, weakMagnitude, strongMagnitudeDisplay, weakMagnitudeDisplay, duration, durationDisplay, button});
+        }
+
+        window.addEventListener('gamepadconnected', event => {
+            if (!gamepad) {
+                gamepad = event.gamepad;
+                gamepadConnectionStatus.innerHTML = 'Gamepad <b>is</b> connected';
+                socket.emit('vibrationIncrease',{})
+            }
+        })
+        window.addEventListener('gamepaddisconnected', event => {
+            if (gamepad == event.gamepad) {
+                gamepad = null;
+                gamepadConnectionStatus.innerHTML = 'Gamepad is <b>not</b> connected';
+                socket.emit('vibrationDecrease',{})
+            }
+        })
+
+        areas.forEach((area) => {
+            area.strongMagnitude.oninput = () => {
+                area.strongMagnitudeDisplay.innerText = area.strongMagnitude.value + '%';
+            }
+            area.weakMagnitude.oninput = () => {
+                area.weakMagnitudeDisplay.innerText = area.weakMagnitude.value + '%';
+            }
+            area.duration.oninput = () => {
+                area.durationDisplay.innerText = area.duration.value + ' seconds';
+            }
+            area.button.onclick = () => {
+                socket.emit('vibration', { strongMagnitude: area.strongMagnitude.value, weakMagnitude: area.weakMagnitude.value, duration: area.duration.value });
+            }
+        })
+
+        socket.on('vibration', msg => {
+            if (msg.strongMagnitude < 0 || msg.strongMagnitude > 100) return;
+            if (msg.weakMagnitude < 0 || msg.weakMagnitude > 100) return;
+            if (msg.duration < 0.5 || msg.duration > 30) return;
+            if (gamepad) {
+                gamepad.vibrationActuator.playEffect("dual-rumble", {
+                    startDelay: 0,
+                    duration: msg.duration * 1000,
+                    weakMagnitude: msg.weakMagnitude / 100,
+                    strongMagnitude: msg.strongMagnitude / 100
+                });
+            }
+        });
+
+        socket.on('vibrationCheck', () => {
+            if (gamepad) socket.emit('vibrationIncrease',{});
+        });
+
+        socket.on('userCount', msg => {
+            currentUserCount.innerHTML = msg.userCount;
+        });
+
+        socket.on('vibrationUpdate', msg => {
+            currentVibratingUsers.innerHTML = msg.vibrating;
+        });
+
+
+    </script>
+</body>
+
+</html>
